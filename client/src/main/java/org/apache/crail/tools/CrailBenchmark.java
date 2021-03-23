@@ -53,6 +53,8 @@ import org.apache.crail.memory.OffHeapBuffer;
 import org.apache.crail.utils.CrailUtils;
 import org.apache.crail.utils.RingBuffer;
 
+
+
 public class CrailBenchmark {
 	private int warmup;
 	private CrailConfiguration conf;
@@ -76,7 +78,47 @@ public class CrailBenchmark {
 			fs = null;
 		}
 	}
-	
+
+	private void nanoCalBenchmarkResults(double start,double end,double loop)
+	{
+		double executionTime = ((double) (end - start));
+		double latency = executionTime * 1000.0 / ((double) loop);
+		System.out.println("execution time [ms] " + executionTime);
+		System.out.println("latency [us] " + latency);
+	}
+
+	private void calculateBenchmarkResults(double start,double end,double ops,double sumbytes){
+		double executionTime = ((double) (end - start)) / 1000.0;
+		double throughput = 0.0;
+		double latency = 0.0;
+		double sumbits = sumbytes * 8.0;
+		if (executionTime > 0) {
+			if(sumbits>0)
+			{
+				throughput = sumbits / executionTime / 1000.0 / 1000.0;
+			}
+			else
+			{
+				throughput = -1;
+			}
+			latency = 1000000.0 * executionTime / ops;
+		}
+
+		printBenchmarkResults(executionTime, ops, sumbytes, throughput, latency);
+	}
+
+	private void printBenchmarkResults(double executionTime, double ops, double sumbytes, double throughput, double latency) {
+		System.out.println("execution time " + executionTime + " s");
+		System.out.println("ops " + ops + " times");
+		if(sumbytes > 0){
+			System.out.println("sumbytes " + sumbytes + " Bytes");
+		}
+		if(throughput > 0) {
+			System.out.println("throughput " + throughput + " Mbps");
+		}
+		System.out.println("latency " + latency + " us");
+	}
+
 	void write(String filename, int size, int loop, int storageClass, int locationClass, boolean buffered, boolean skipDir) throws Exception {
 		System.out.println("write, filename " + filename  + ", size " + size + ", loop " + loop + ", storageClass " + storageClass + ", locationClass " + locationClass + ", buffered " + buffered);
 		
@@ -122,24 +164,11 @@ public class CrailBenchmark {
 			bufferedStream.close();
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double throughput = 0.0;
-		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
-		if (executionTime > 0) {
-			throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			latency = 1000000.0 * executionTime / ops;
-		}
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("sumbytes " + sumbytes);
-		System.out.println("throughput " + throughput);
-		System.out.println("latency " + latency);
-		
+
+		calculateBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
-	
+
 	void writeAsync(String filename, int size, int loop, int batch, int storageClass, int locationClass, boolean skipDir) throws Exception {
 		System.out.println("writeAsync, filename " + filename  + ", size " + size + ", loop " + loop + ", batch " + batch + ", storageClass " + storageClass + ", locationClass " + locationClass);
 		
@@ -205,22 +234,9 @@ public class CrailBenchmark {
 			ops = ops + 1.0;			
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double throughput = 0.0;
-		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
-		if (executionTime > 0) {
-			throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			latency = 1000000.0 * executionTime / ops;
-		}
-		directStream.close();	
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("sumbytes " + sumbytes);
-		System.out.println("throughput " + throughput);
-		System.out.println("latency " + latency);
-		
+		directStream.close();
+
+		calculateBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 
@@ -285,23 +301,10 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double throughput = 0.0;
-		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
-		if (executionTime > 0) {
-			throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			latency = 1000000.0 * executionTime / ops;
-		}
 		bufferedStream.close();	
 		directStream.close();
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("sumbytes " + sumbytes);
-		System.out.println("throughput " + throughput);
-		System.out.println("latency " + latency);
-		
+
+		calculateBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 	
@@ -368,23 +371,10 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double throughput = 0.0;
-		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
-		if (executionTime > 0) {
-			throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			latency = 1000000.0 * executionTime / ops;
-		}		
 		bufferedStream.close();
 		directStream.close();
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("sumbytes " + sumbytes);
-		System.out.println("throughput " + throughput);
-		System.out.println("latency " + latency);
-		
+
+		calculateBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}	
 	
@@ -450,22 +440,9 @@ public class CrailBenchmark {
 			ops = ops + 1.0;			
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double throughput = 0.0;
-		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
-		if (executionTime > 0) {
-			throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			latency = 1000000.0 * executionTime / ops;
-		}
-		directStream.close();	
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("sumbytes " + sumbytes);
-		System.out.println("throughput " + throughput);
-		System.out.println("latency " + latency);
-		
+		directStream.close();
+
+		calculateBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 
@@ -515,23 +492,11 @@ public class CrailBenchmark {
 				ret = multiStream.read(buf);
 			}
 			long end = System.currentTimeMillis();
-			multiStream.close();	
-			
-			double executionTime = ((double) (end - start)) / 1000.0;
-			double throughput = 0.0;
-			double latency = 0.0;
-			double sumbits = sumbytes * 8.0;
-			if (executionTime > 0) {
-				throughput = sumbits / executionTime / 1000.0 / 1000.0;
-				latency = 1000000.0 * executionTime / ops;
-			}
-			
+			multiStream.close();
+
 			System.out.println("round " + i + ":");
 			System.out.println("bytes read " + _sumbytes);
-			System.out.println("execution time " + executionTime);
-			System.out.println("ops " + ops);
-			System.out.println("throughput " + throughput);
-			System.out.println("latency " + latency);
+			calculateBenchmarkResults(start,end,ops,sumbytes);
 		}
 	
 		fs.getStatistics().print("close");
@@ -558,7 +523,7 @@ public class CrailBenchmark {
 			String f = filename + "/" + name;
 			pathQueue.add(f);
 		}		
-		
+
 		double ops = 0;
 		long start = System.currentTimeMillis();
 		while(!pathQueue.isEmpty()){
@@ -566,16 +531,8 @@ public class CrailBenchmark {
 			fs.create(path, CrailNodeType.DATAFILE, CrailStorageClass.DEFAULT, CrailLocationClass.DEFAULT, true).get().syncDir();
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double latency = 0.0;
-		if (executionTime > 0) {
-			latency = 1000000.0 * executionTime / ops;
-		}	
-		
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("latency " + latency);
-		
+
+		calculateBenchmarkResults(start,end,ops,-1);
 		fs.getStatistics().print("close");
 	}
 
@@ -622,15 +579,12 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start));
-		double latency = executionTime*1000.0 / ((double) loop);
-		System.out.println("execution time [ms] " + executionTime);
-		System.out.println("latency [us] " + latency);
+
+		nanoCalBenchmarkResults(start,end,loop);
 	
 		fs.delete(filename, true).get().syncDir();
 		
 		fs.getStatistics().print("close");
-		
 	}
 
 	void createMultiFile(String filename, int storageClass) throws Exception, InterruptedException {
@@ -659,10 +613,7 @@ public class CrailBenchmark {
 			directInputStream.close();
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start));
-		double latency = executionTime * 1000.0 / ((double) loop);
-		System.out.println("execution time [ms] " + executionTime);
-		System.out.println("latency [us] " + latency);		
+		nanoCalBenchmarkResults(start,end,loop);
 		
 		fs.getStatistics().print("close");
 	}
@@ -691,12 +642,8 @@ public class CrailBenchmark {
 		double latency = 0.0;
 		if (executionTime > 0) {
 			latency = 1000000.0 * executionTime / ops;
-		}	
-		System.out.println("execution time " + executionTime);
-		System.out.println("ops " + ops);
-		System.out.println("latency " + latency);
-		
-		fs.getStatistics().print("close");
+		}
+		printBenchmarkResults(executionTime, ops, -1, -1,latency);
 		fs.close();
 	}
 	
@@ -727,10 +674,7 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start));
-		double latency = executionTime*1000.0 / ((double) batch);
-		System.out.println("execution time [ms] " + executionTime);
-		System.out.println("latency [us] " + latency);
+		nanoCalBenchmarkResults(start,end,loop);
 		
 		fs.getStatistics().print("close");
 	}
@@ -757,10 +701,7 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start));
-		double latency = executionTime * 1000.0 / ((double) loop);
-		System.out.println("execution time [ms] " + executionTime);
-		System.out.println("latency [us] " + latency);
+		nanoCalBenchmarkResults(start,end,loop);
 
 		fs.getStatistics().print("close");
 	}
@@ -872,8 +813,7 @@ public class CrailBenchmark {
 			ops++;
 		}			
 		seekStream.close();
-		long end = System.currentTimeMillis();
-		
+
 		System.out.println("falseMatches " + falseMatches);
 		fs.getStatistics().print("close");
 	}	
