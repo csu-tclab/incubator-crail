@@ -111,7 +111,7 @@ public class CrailBenchmark {
 		System.out.println("execution time " + executionTime + " s");
 		System.out.println("ops " + ops + " times");
 		if(sumbytes > 0){
-			System.out.println("sumbytes " + sumbytes + " Bytes");
+			System.out.println("sumKbytes " + sumbytes/1024 + " KBytes");
 		}
 		if(throughput > 0) {
 			System.out.println("throughput " + throughput + " Mbps");
