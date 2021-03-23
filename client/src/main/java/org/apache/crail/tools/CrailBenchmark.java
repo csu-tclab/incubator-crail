@@ -79,44 +79,26 @@ public class CrailBenchmark {
 		}
 	}
 
-	private void nanoCalBenchmarkResults(double start,double end,double loop)
-	{
-		double executionTime = ((double) (end - start));
-		double latency = executionTime * 1000.0 / ((double) loop);
-		System.out.println("execution time [ms] " + executionTime);
-		System.out.println("latency [us] " + latency);
-	}
-
-	private void calculateBenchmarkResults(double start,double end,double ops,double sumbytes){
-		double executionTime = ((double) (end - start)) / 1000.0;
+	private void printBenchmarkResults(double start, double end, double ops, double sumbytes) {
+		double executionTime = (end - start) / 1000.0;		// ms/1000==s
 		double throughput = 0.0;
 		double latency = 0.0;
-		double sumbits = sumbytes * 8.0;
+		double sumbits = sumbytes * 8.0;								// bit
 		if (executionTime > 0) {
-			if(sumbits>0)
-			{
-				throughput = sumbits / executionTime / 1000.0 / 1000.0;
-			}
+			if(sumbits > 0)
+				throughput = sumbits / executionTime / 1000.0 / 1000.0;	// bit/s==bps bps/1000/1000==Mbps
 			else
-			{
 				throughput = -1;
-			}
-			latency = 1000000.0 * executionTime / ops;
+			latency = executionTime / ops * 1000.0 * 1000.0;			// s/ops*1000*1000==μs
 		}
 
-		printBenchmarkResults(executionTime, ops, sumbytes, throughput, latency);
-	}
-
-	private void printBenchmarkResults(double executionTime, double ops, double sumbytes, double throughput, double latency) {
 		System.out.println("execution time " + executionTime + " s");
-		System.out.println("ops " + ops + " times");
-		if(sumbytes > 0){
-			System.out.println("sumKbytes " + sumbytes/1024 + " KBytes");
-		}
-		if(throughput > 0) {
+		System.out.println("operations " + ops + " times");
+		if(sumbytes > 0)
+			System.out.println("total " + sumbytes/1024/1024 + " MBytes");
+		if(throughput > 0)
 			System.out.println("throughput " + throughput + " Mbps");
-		}
-		System.out.println("latency " + latency + " us");
+		System.out.println("latency " + latency + " μs");
 	}
 
 	void write(String filename, int size, int loop, int storageClass, int locationClass, boolean buffered, boolean skipDir) throws Exception {
@@ -165,7 +147,7 @@ public class CrailBenchmark {
 		}
 		long end = System.currentTimeMillis();
 
-		calculateBenchmarkResults(start,end,ops,sumbytes);
+		printBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 
@@ -236,7 +218,7 @@ public class CrailBenchmark {
 		long end = System.currentTimeMillis();
 		directStream.close();
 
-		calculateBenchmarkResults(start,end,ops,sumbytes);
+		printBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 
@@ -304,7 +286,7 @@ public class CrailBenchmark {
 		bufferedStream.close();	
 		directStream.close();
 
-		calculateBenchmarkResults(start,end,ops,sumbytes);
+		printBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 	
@@ -374,7 +356,7 @@ public class CrailBenchmark {
 		bufferedStream.close();
 		directStream.close();
 
-		calculateBenchmarkResults(start,end,ops,sumbytes);
+		printBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}	
 	
@@ -442,7 +424,7 @@ public class CrailBenchmark {
 		long end = System.currentTimeMillis();
 		directStream.close();
 
-		calculateBenchmarkResults(start,end,ops,sumbytes);
+		printBenchmarkResults(start,end,ops,sumbytes);
 		fs.getStatistics().print("close");
 	}
 
@@ -496,7 +478,7 @@ public class CrailBenchmark {
 
 			System.out.println("round " + i + ":");
 			System.out.println("bytes read " + _sumbytes);
-			calculateBenchmarkResults(start,end,ops,sumbytes);
+			printBenchmarkResults(start,end,ops,sumbytes);
 		}
 	
 		fs.getStatistics().print("close");
@@ -532,7 +514,7 @@ public class CrailBenchmark {
 		}
 		long end = System.currentTimeMillis();
 
-		calculateBenchmarkResults(start,end,ops,-1);
+		printBenchmarkResults(start,end,ops,-1);
 		fs.getStatistics().print("close");
 	}
 
@@ -580,7 +562,7 @@ public class CrailBenchmark {
 		}
 		long end = System.currentTimeMillis();
 
-		nanoCalBenchmarkResults(start,end,loop);
+		printBenchmarkResults(start,end,loop,-1);
 	
 		fs.delete(filename, true).get().syncDir();
 		
@@ -613,7 +595,7 @@ public class CrailBenchmark {
 			directInputStream.close();
 		}
 		long end = System.currentTimeMillis();
-		nanoCalBenchmarkResults(start,end,loop);
+		printBenchmarkResults(start,end,loop,-1);
 		
 		fs.getStatistics().print("close");
 	}
@@ -638,12 +620,9 @@ public class CrailBenchmark {
 			fs.lookup(filename).get().asFile();
 		}
 		long end = System.currentTimeMillis();
-		double executionTime = ((double) (end - start)) / 1000.0;
-		double latency = 0.0;
-		if (executionTime > 0) {
-			latency = 1000000.0 * executionTime / ops;
-		}
-		printBenchmarkResults(executionTime, ops, -1, -1,latency);
+
+		printBenchmarkResults(start,end,ops,-1);
+		fs.getStatistics().print("close");
 		fs.close();
 	}
 	
@@ -674,7 +653,7 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		nanoCalBenchmarkResults(start,end,loop);
+		printBenchmarkResults(start,end,loop,-1);
 		
 		fs.getStatistics().print("close");
 	}
@@ -701,7 +680,7 @@ public class CrailBenchmark {
 			}
 		}
 		long end = System.currentTimeMillis();
-		nanoCalBenchmarkResults(start,end,loop);
+		printBenchmarkResults(start,end,loop,-1);
 
 		fs.getStatistics().print("close");
 	}
