@@ -89,7 +89,8 @@ public class CrailBenchmark {
 				throughput = sumbits / executionTime / 1000.0 / 1000.0;	// bit/s==bps bps/1000/1000==Mbps
 			else
 				throughput = -1;
-			latency = executionTime / ops * 1000.0 * 1000.0;			// s/ops*1000*1000==μs
+			if (ops > 0)
+				latency = executionTime / ops * 1000.0 * 1000.0;			// s/ops*1000*1000==μs
 		}
 
 		System.out.println("execution time " + executionTime + " s");
@@ -98,7 +99,8 @@ public class CrailBenchmark {
 			System.out.println("total " + sumbytes/1024/1024 + " MBytes");
 		if(throughput > 0)
 			System.out.println("throughput " + throughput + " Mbps");
-		System.out.println("latency " + latency + " μs");
+		if(latency > 0)
+			System.out.println("latency " + latency + " μs");
 	}
 
 	void write(String filename, int size, int loop, int storageClass, int locationClass, boolean buffered, boolean skipDir) throws Exception {
